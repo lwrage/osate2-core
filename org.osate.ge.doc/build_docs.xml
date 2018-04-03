@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<project name="build Eclipse Help" default="build-help">
+
+  <description>
+    Used to transform DocBook XML to Eclipse help output
+  </description>
+
+  <!-- Define base properties -->
+  <property name="user_guide.dir" value="user_guide" />
+  <property name="dev_guide_output.dir" value="dev_guide_output" />
+  <property name="user_guide_output.dir" value="user_guide_output" />
+
+  <!-- Making saxon available -->
+  <path id="saxon.class.path">
+<pathelement location="lib/saxon.jar" />
+  </path>
+
+  <!-- - target: usage -->
+  <target name="usage" description="Prints help">
+<echo message="Use -projecthelp to get a list of the available targets." />
+  </target>
+
+  <!-- - target: clean -->
+  <target name="clean" description="Cleans up generated files.">
+  <delete dir="${dev_guide_output.dir}" />
+  <delete dir="${user_guide_output.dir}" />
+  </target>
+
+  <target name="build-help" depends="clean, build_dev_guide, build_user_guide"
+description="Generates eclipse help files">
+<echo message="Building output" />
+
+<!-- Copy the images to the same directory as the HTML files -->
+<copy todir="${user_guide.dir}\images">
+  <fileset dir="${user_guide_output.dir}\images">
+<include name="*" />
+  </fileset>
+</copy>
+  	
+<!-- Transfer to eclipse help format -->
+  </target>
+	
+   <target name="build_dev_guide" description="Build the developer guide">
+	<mkdir dir="${dev_guide_output.dir}" />
+	<mkdir dir="${dev_guide_output.dir}/images" />
+   	
+   	<apply executable="pandoc" dest="./dev_guide_output/" parallel="false">
+        <srcfile/>
+    	<arg value="-s"/>
+   		<arg value="-f"/>
+   	    <arg value="markdown"/>
+   		<arg value="-t"/>
+   		<arg value="html5"/>
+   		<arg value="-o"/>
+   		<targetfile/>	
+        <fileset dir="./dev_guide" includes="*.md"/>
+   		<mapper type="glob" from="*.md" to="*.html"/>
+    </apply>
+   </target>
+	
+	<target name="build_user_guide" description="Build the user guide">
+		<mkdir dir="${user_guide_output.dir}" />
+		<mkdir dir="${user_guide_output.dir}/images" />
+		
+		<!-- Copy the images to the same directory as the HTML files -->
+		<copy todir="${user_guide_output.dir}\images">
+		  <fileset dir="${user_guide.dir}\images">
+		<include name="*" />
+		  </fileset>
+		</copy>
+		
+		<apply executable="pandoc" dest="./user_guide_output/" parallel="false">
+			 <srcfile/>
+	    	<arg value="-s"/>
+	   		<arg value="-f"/>
+	   	    <arg value="markdown"/>
+	   		<arg value="-t"/>
+	   		<arg value="html5"/>
+	   		<arg value="-o"/>
+	   		<targetfile/>	
+	        <fileset dir="./user_guide" includes="*.md"/>
+	   		<mapper type="glob" from="*.md" to="*.html"/>
+		</apply>
+	</target>
+
+
+</project> 

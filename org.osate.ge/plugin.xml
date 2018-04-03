@@ -1,0 +1,760 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="org.osate.ge.tooltips" name="Tooltips" schema="schema/org.osate.ge.tooltips.exsd"/>
+   <extension-point id="org.osate.ge.commands" name="Tools" schema="schema/org.osate.ge.commands.exsd"/>
+   <extension-point id="org.osate.ge.tools" name="Tools" schema="schema/org.osate.ge.tools.exsd"/>
+   <extension-point id="org.osate.ge.categories" name="Categories" schema="schema/org.osate.ge.categories.exsd"/>
+   <extension-point id="org.osate.ge.images" name="Images" schema="schema/org.osate.ge.images.exsd"/>
+   <extension-point id="org.osate.ge.references" name="Reference Handling" schema="schema/org.osate.ge.references.exsd"/>
+   <extension-point id="org.osate.ge.businessObjectHandlers" name="Business Object Handlers" schema="schema/org.osate.ge.businessObjectHandlers.exsd"/>
+	<extension point="org.eclipse.ui.commands">
+	   <command id="org.osate.ge.commands.opendiagram" name="Open Diagram" defaultHandler="org.osate.ge.internal.ui.handlers.OpenDiagramHandler"></command>
+	   <command 
+	   		id="org.osate.ge.commands.open.diagram.from.navigator"
+			name="Open Diagram" 
+			description="Open Diagram">
+		</command>
+   </extension>
+       
+   <extension point="org.eclipse.ui.menus">
+		<menuContribution allPopups="false" locationURI="popup:#TextEditorContext?after=additions">
+			<command commandId="org.osate.ge.commands.opendiagram" style="push"/>
+		</menuContribution>
+		<menuContribution allPopups="false" locationURI="popup:org.osate.xtext.aadl2.ui.outline?after=additions">
+			<command commandId="org.osate.ge.commands.opendiagram" style="push"/>
+		</menuContribution>
+       <menuContribution
+            locationURI="popup:org.osate.ui.navigator.AadlNavigator">
+         <command
+             commandId="org.osate.ge.commands.open.diagram.from.navigator"
+             label="Open Diagram"
+             tooltip="Open Diagram" 
+             style="push"
+             mnemonic="O">
+          <visibleWhen>
+            <reference definitionId="org.osate.ge.compatibleElementSelected">
+            </reference>
+         </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
+	   
+   <extension point="org.eclipse.graphiti.ui.diagramTypes">      
+      <diagramType
+            name="AADL Diagram Type"
+            type="AADL Diagram"
+            id="org.osate.ge.aadlDiagramType">
+      </diagramType>
+   </extension>
+   
+   <extension point="org.eclipse.graphiti.ui.diagramTypeProviders">     
+      <diagramTypeProvider
+            name="AADL Component Implementation Diagram Type Provider"
+            class="org.osate.ge.internal.AgeDiagramTypeProvider"
+            id="org.osate.ge.aadlDiagramTypeProvider">
+         <diagramType
+               id="org.osate.ge.aadlDiagramType">
+         </diagramType>
+		 <imageProvider
+            id="org.osate.ge.image_provider">
+      	 </imageProvider>
+      </diagramTypeProvider>
+   </extension>
+   
+   <extension
+	    point = "org.eclipse.ui.editors">
+		<editor
+	  	   id = "org.osate.ge.editor.AgeDiagramEditor"
+	  	   name="AADL Diagram Editor"
+      	   class="org.osate.ge.internal.ui.editor.AgeDiagramEditor"
+		   extensions="aadl_diagram"
+           contributorClass="org.osate.ge.internal.ui.editor.AgeDiagramEditorActionBarContributor"
+           matchingStrategy="org.eclipse.graphiti.ui.editor.DiagramEditorMatchingStrategy">
+		</editor>
+	</extension>
+
+	<extension point="org.eclipse.ui.startup">
+      <startup class="org.osate.ge.internal.ui.xtext.AgeXtextUtil$Initializer">
+      </startup>
+   </extension>
+   
+	<extension point="org.eclipse.core.runtime.adapters">
+		<factory adaptableType="org.eclipse.graphiti.ui.platform.GraphitiShapeEditPart" class="org.osate.ge.internal.ui.editor.GraphitiEditPartAdapterFactory">
+			<adapter type="org.osate.xtext.aadl2.ui.propertyview.IAadlPropertySource"/>
+			<adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
+		</factory>
+		<factory adaptableType="org.eclipse.graphiti.ui.platform.GraphitiConnectionEditPart" class="org.osate.ge.internal.ui.editor.GraphitiEditPartAdapterFactory">
+			<adapter type="org.osate.xtext.aadl2.ui.propertyview.IAadlPropertySource"/>
+			<adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
+		</factory>
+	</extension>
+
+  <extension
+        point="org.eclipse.ui.navigator.navigatorContent">
+     <navigatorContent
+           activeByDefault="true"
+           contentProvider="org.osate.ge.internal.ui.navigator.ContentProvider"
+           id="org.osate.ge.navigatorContent"
+           labelProvider="org.osate.ge.internal.ui.navigator.LabelProvider"
+           name="AADL Diagrams"
+           priority="highest">
+           
+		<actionProvider
+			class="org.osate.ge.internal.ui.navigator.ActionProvider">
+		</actionProvider>
+		
+        <enablement>
+           <or>
+              <instanceof
+                    value="org.eclipse.core.resources.IResource">
+              </instanceof>
+           </or>
+        </enablement>
+     </navigatorContent>
+  </extension>
+  
+  <extension
+        point="org.eclipse.ui.navigator.viewer">
+     <viewerContentBinding
+           viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+        <includes>
+           <contentExtension
+                 isRoot="false"
+                 pattern="org.osate.ge.*">
+           </contentExtension>
+        </includes>
+     </viewerContentBinding>
+     <viewerContentBinding
+           viewerId="org.osate.ui.navigator.AadlNavigator">
+        <includes>
+           <contentExtension
+                 isRoot="false"
+                 pattern="org.osate.ge.*">
+           </contentExtension>
+        </includes>
+     </viewerContentBinding>
+  </extension>
+  
+  <extension
+        point="org.eclipse.ui.navigator.navigatorContent">
+     <navigatorContent
+           activeByDefault="true"
+           id="org.osate.ge.navigatorContent2"
+           name="Sort by Label (AGE)"
+           priority="highest"
+           sortOnly="true">
+        <commonSorter
+              class="org.osate.ge.internal.ui.navigator.Sorter"
+              id="org.osate.ge.navigatorContent.sorter">
+           <parentExpression>
+              <or>
+                 <adapt
+                       type="org.eclipse.core.resources.IFolder">
+                    <test
+                          property="org.osate.ge.name"
+                          value="diagrams">
+                    </test>
+                 </adapt></or>
+           </parentExpression>
+        </commonSorter>
+     </navigatorContent>
+  </extension>
+  <extension
+        point="org.eclipse.ui.navigator.linkHelper">
+     <linkHelper
+           class="org.osate.ge.internal.ui.navigator.LinkHelper"
+           id="org.osate.ge.linkHelper">
+        <editorInputEnablement>
+           <instanceof
+                 value="org.eclipse.graphiti.ui.editor.IDiagramEditorInput">
+           </instanceof></editorInputEnablement>
+     </linkHelper>
+  </extension>
+  <extension
+        point="org.eclipse.ui.newWizards">
+     <wizard
+           category="org.osate.Wizard.category.ID"
+           class="org.osate.ge.internal.wizards.NewPackageWizard"
+           id="org.osate.ge.wizards.NewPackageWizard"
+           name="Aadl Package (Graphical)">
+     </wizard>
+  </extension>
+  <extension
+        point="org.eclipse.core.expressions.propertyTesters">
+     <propertyTester
+           class="org.osate.ge.internal.ui.navigator.PropertyTester"
+           id="org.osate.ge.navigator.propertyTester"
+           namespace="org.osate.ge"
+           properties="name,isAadlPackage"
+           type="org.eclipse.core.resources.IResource">
+     </propertyTester>
+  </extension>
+  
+ <extension
+      point="org.eclipse.graphiti.ui.imageProviders">
+   <imageProvider
+         class="org.osate.ge.internal.AgeImageProvider"
+         id="org.osate.ge.image_provider">
+   </imageProvider>
+</extension>
+
+ <extension
+       point="org.eclipse.ui.bindings">
+    <key
+    	  commandId="org.eclipse.graphiti.ui.featureExecutionCommand"
+          contextId="org.eclipse.ui.contexts.dialogAndWindow"
+          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+          sequence="M1+M2+V">
+        <parameter
+        	id="org.eclipse.graphiti.ui.featureHint"
+        	value="graphicalToTextualFeature">
+        </parameter>
+    </key>
+    <key
+          commandId="org.osate.ge.commands.opendiagram"
+          contextId="org.eclipse.ui.textEditorScope"
+          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+          sequence="M1+M2+V">
+    </key>
+
+     <key
+          commandId="org.osate.ge.commands.open.diagram.from.navigator"
+          schemeId="org.osate.ge.key.bindings"
+          sequence="M1+Enter">
+     </key>
+     <scheme
+           id="org.osate.ge.key.bindings"
+           parentId="org.eclipse.ui.defaultAcceleratorConfiguration"
+           description="Osate Key Bindings"
+           name="OsateKeyBindings">
+     </scheme>
+  </extension>
+  
+<extension point="org.eclipse.ui.views.properties.tabbed.propertyContributor">
+    <propertyContributor contributorId="org.osate.ge.editor.AgeDiagramEditor"> 
+        <propertyCategory category="org.osate.ge"> 
+        </propertyCategory> 
+    </propertyContributor> 
+</extension>
+       
+ <extension
+      point="org.eclipse.ui.views.properties.tabbed.propertyTabs">
+    <propertyTabs contributorId="org.osate.ge.editor.AgeDiagramEditor">       
+		<propertyTab category="org.osate.ge" id="org.osate.ge.bindings" label="Bindings">
+    </propertyTab>
+    	<propertyTab category="org.osate.ge" id="org.osate.ge.connections" label="Connections">
+    </propertyTab>
+   </propertyTabs>
+</extension>
+     
+ <extension
+      point="org.eclipse.ui.views.properties.tabbed.propertySections">
+    <propertySections
+          contributorId="org.osate.ge.editor.AgeDiagramEditor">
+        <propertySection
+              class="org.osate.ge.internal.ui.properties.BindingsSection"
+              filter="org.osate.ge.internal.ui.properties.BindingsFilter"
+              id="graphiti.main.tab.emfclass"
+              tab="org.osate.ge.bindings">
+        </propertySection>
+        <propertySection
+              class="org.osate.ge.internal.ui.properties.ConnectionsSection"
+              filter="org.osate.ge.internal.ui.properties.ConnectionsFilter"
+              id="graphiti.main.tab.emfclass"
+              tab="org.osate.ge.connections">
+        </propertySection>
+    </propertySections>
+ </extension>
+
+ <extension
+       point="org.eclipse.core.expressions.definitions">
+    <definition
+          id="oneElementSelected">
+       <with
+             variable="selection">
+            <count
+                  value="1">
+            </count>
+             
+       </with>
+    </definition>
+ </extension>
+    <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.osate.ge.internal.ui.handlers.OpenDiagramFromNavigatorHandler"
+            commandId="org.osate.ge.commands.open.diagram.from.navigator">
+         <enabledWhen>
+            <reference
+                  definitionId="org.osate.ge.compatibleElementSelected">
+            </reference>
+         </enabledWhen>
+      </handler>
+   </extension>
+    <extension
+          point="org.eclipse.core.expressions.definitions">
+       <definition id="org.osate.ge.compatibleElementSelected">
+       	<and>
+            <reference
+                  definitionId="oneElementSelected">
+            </reference>
+	        <with variable="selection">
+	           <iterate ifEmpty="false" operator="and">
+	              <or>
+	                <adapt type="org.eclipse.core.resources.IFile">
+                       <or>
+                          <test
+                                property="org.osate.ge.isAadlPackage">
+                          </test>
+                          <test
+                                args="extension"
+                                property="org.eclipse.core.resources.extension"
+                                value="aaxl2">
+                          </test>
+                       </or>
+	                </adapt>
+	                <adapt type="org.osate.aadl2.Classifier"/>
+	                <adapt type="org.osate.aadl2.PackageSection"/>
+	                <adapt type="org.osate.aadl2.AadlPackage"/>
+	              </or>
+	           </iterate>
+	        </with>
+        </and>    
+       </definition>
+    </extension>
+    
+    <extension
+          point="org.osate.ge.tools">
+       <tool class="org.osate.ge.internal.ui.tools.CreateEndToEndFlowSpecificationTool"/>
+       <tool class="org.osate.ge.internal.ui.tools.CreateFlowImplementationTool"/>
+       <tool class="org.osate.ge.internal.ui.tools.SetBindingTool"/>
+    </extension>
+    
+    <extension
+          point="org.osate.ge.tooltips">
+       <tooltipContributor 
+       		class="org.osate.ge.internal.tooltips.FeatureTooltipContributor"
+       		priority="1">
+       </tooltipContributor>
+    </extension>
+
+    <extension
+          point="org.osate.ge.categories">
+          <category
+             id="org.osate.ge.categories.connections"
+             name="Connections"
+             order="20">
+       </category>
+       <category
+             id="org.osate.ge.categories.classifiers"
+             name="Classifiers"
+             order="10">
+       </category>
+       <category
+             id="org.osate.ge.categories.flows"
+             name="Flows"
+             order="40">
+       </category>
+       <category
+             id="org.osate.ge.categories.features"
+             name="Features"
+             order="30">
+       </category>
+       <category
+             id="org.osate.ge.categories.modes"
+             name="Modes"
+             order="50">
+       </category>
+       <category
+             id="org.osate.ge.categories.subcomponents"
+             name="Subcomponents"
+             order="70">
+       </category>
+       <category
+             id="org.osate.ge.categories.subprogram_calls"
+             name="Subprogram Calls"
+             order="80">
+       </category>
+        <category
+             id="org.osate.ge.categories.relationships"
+             name="Relationships"
+             order="60">
+       </category>
+    </extension>
+    <extension
+          point="org.osate.ge.images">
+       <image
+             id="org.osate.ge.AbstractType"
+             path="/icons/full/obj16/AbstractType.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.AbstractImplementation"
+             path="/icons/full/obj16/AbstractImplementation.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.BusType"
+             path="/icons/full/obj16/BusType.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+           <image
+             id="org.osate.ge.BusImplementation"
+             path="/icons/full/obj16/BusImplementation.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.DataType"
+             path="/icons/full/obj16/DataType.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.DataImplementation"
+             path="/icons/full/obj16/DataImplementation.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.DeviceType"
+             path="/icons/full/obj16/DeviceType.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.DeviceImplementation"
+             path="/icons/full/obj16/DeviceImplementation.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.FeatureGroupType"
+             path="/icons/full/obj16/FeatureGroup.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.MemoryType"
+             path="/icons/full/obj16/MemoryType.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.MemoryImplementation"
+             path="/icons/full/obj16/MemoryImplementation.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.ProcessType"
+             path="/icons/full/obj16/ProcessType.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.ProcessImplementation"
+             path="/icons/full/obj16/ProcessImplementation.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.ProcessorType"
+             path="/icons/full/obj16/ProcessorType.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.ProcessorImplementation"
+             path="/icons/full/obj16/ProcessorImplementation.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.SubprogramType"
+             path="/icons/full/obj16/SubprogramType.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.SubprogramImplementation"
+             path="/icons/full/obj16/SubprogramImplementation.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.SubprogramGroupType"
+             path="/icons/full/obj16/SubprogramGroupType.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.SubprogramGroupImplementation"
+             path="/icons/full/obj16/SubprogramGroupImplementation.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.SystemType"
+             path="/icons/full/obj16/SystemType.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.SystemImplementation"
+             path="/icons/full/obj16/SystemImplementation.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.ThreadType"
+             path="/icons/full/obj16/ThreadType.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.ThreadImplementation"
+             path="/icons/full/obj16/ThreadImplementation.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.ThreadGroupType"
+             path="/icons/full/obj16/ThreadGroupType.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.ThreadGroupImplementation"
+             path="/icons/full/obj16/ThreadGroupImplementation.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.VirtualBusType"
+             path="/icons/full/obj16/VirtualBusType.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.VirtualBusImplementation"
+             path="/icons/full/obj16/VirtualBusImplementation.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.VirtualProcessorType"
+             path="/icons/full/obj16/VirtualProcessorType.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.VirtualProcessorImplementation"
+             path="/icons/full/obj16/VirtualProcessorImplementation.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.AbstractFeature"
+             path="/icons/full/obj16/AbstractFeature.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.BusAccess"
+             path="/icons/full/obj16/BusAccess.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.DataAccess"
+             path="/icons/full/obj16/DataAccess.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.DataPort"
+             path="/icons/full/obj16/DataPort.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.EventDataPort"
+             path="/icons/full/obj16/EventDataPort.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.EventPort"
+             path="/icons/full/obj16/EventPort.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.FeatureGroup"
+             path="/icons/full/obj16/FeatureGroup.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.SubprogramAccess"
+             path="/icons/full/obj16/SubprogramAccess.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.SubprogramGroupAccess"
+             path="/icons/full/obj16/SubprogramGroupAccess.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.AccessConnection"
+             path="/icons/full/obj16/AccessConnection.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.FeatureConnection"
+             path="/icons/full/obj16/FeatureConnection.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.FeatureGroupConnection"
+             path="/icons/full/obj16/FeatureGroupConnection.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.ParameterConnection"
+             path="/icons/full/obj16/AccessConnection.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.PortConnection"
+             path="/icons/full/obj16/PortConnection.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+        <image
+             id="org.osate.ge.AbstractSubcomponent"
+             path="/icons/full/obj16/AbstractSubcomponent.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.BusSubcomponent"
+             path="/icons/full/obj16/BusSubcomponent.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.DataSubcomponent"
+             path="/icons/full/obj16/DataSubcomponent.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.DeviceSubcomponent"
+             path="/icons/full/obj16/DeviceSubcomponent.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.MemorySubcomponent"
+             path="/icons/full/obj16/MemorySubcomponent.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.ProcessorSubcomponent"
+             path="/icons/full/obj16/ProcessorSubcomponent.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.ProcessSubcomponent"
+             path="/icons/full/obj16/ProcessSubcomponent.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.SubprogramSubcomponent"
+             path="/icons/full/obj16/SubprogramSubcomponent.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.SubprogramGroupSubcomponent"
+             path="/icons/full/obj16/SubprogramGroupSubcomponent.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.SystemSubcomponent"
+             path="/icons/full/obj16/SystemSubcomponent.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.ThreadSubcomponent"
+             path="/icons/full/obj16/ThreadSubcomponent.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.ThreadGroupSubcomponent"
+             path="/icons/full/obj16/ThreadGroupSubcomponent.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.VirtualBusSubcomponent"
+             path="/icons/full/obj16/VirtualBusSubcomponent.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.VirtualProcessorSubcomponent"
+             path="/icons/full/obj16/VirtualProcessorSubcomponent.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.Mode"
+             path="/icons/full/obj16/Mode.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.ModeTransition"
+             path="/icons/full/obj16/ModeTransition.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.Parameter"
+             path="/icons/full/obj16/Parameter.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.EventSource"
+             path="/icons/full/obj16/EventPort.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.EventDataSource"
+             path="/icons/full/obj16/EventDataPort.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.PortProxy"
+             path="/icons/full/obj16/AbstractFeature.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.SubprogramProxy"
+             path="/icons/full/obj16/SubprogramAccess.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.FlowPath"
+             path="/icons/full/obj16/FlowPath.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.FlowSink"
+             path="/icons/full/obj16/FlowSink.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.FlowSource"
+             path="/icons/full/obj16/FlowSource.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.Generalization"
+             path="/icons/full/obj16/ModeTransition.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.SubprogramCall"
+             path="/icons/full/obj16/SubprogramSubcomponent.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.SubprogramCallSequence"
+             path="/icons/full/obj16/SubprogramCallSequence.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.DefaultAnnexLibrary"
+             path="/icons/full/obj16/DefaultAnnexLibrary.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+       <image
+             id="org.osate.ge.DefaultAnnexSubclause"
+             path="/icons/full/obj16/DefaultAnnexSubclause.gif"
+             plugin="org.osate.aadl2.edit">
+       </image>
+    </extension>
+    <extension
+          point="org.osate.ge.references">
+       <referenceBuilder
+             class="org.osate.ge.internal.services.impl.DeclarativeReferenceBuilder">
+       </referenceBuilder>
+		<referenceBuilder
+             class="org.osate.ge.internal.services.impl.InstanceReferenceBuilder">
+       </referenceBuilder>
+       <referenceResolver
+             class="org.osate.ge.internal.services.impl.InstanceReferenceResolver">
+       </referenceResolver>
+    </extension>
+</plugin>
